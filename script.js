@@ -1,5 +1,5 @@
 let generatedWord = "";
-let btn = document.querySelector(".check-btn"); 
+let btn = document.querySelector(".check-btn");
 let attempts = 0;
 
 async function fetchRandomWord() {
@@ -13,7 +13,7 @@ async function fetchRandomWord() {
     const data = await response.json();
     generatedWord = data[0].toUpperCase(); // Store the generated word
     console.log("Generated word:", generatedWord);
-    resetGame(); 
+    resetGame();
   } catch (error) {
     console.error("Error:", error.message);
   }
@@ -45,7 +45,6 @@ function addLetter(letter, rowId) {
   alphabetCnt += 1;
   rowId = generateRowId(rowId, alphabetCnt);
 
-  // console.log(rowId);
   const boxes = document.querySelectorAll(`#${rowId} .box`);
   for (let box of boxes) {
     if (box.textContent === "") {
@@ -81,13 +80,7 @@ function checkRowFilled(rowId) {
 
 async function checkWord(rowId) {
   let greenCnt = 0;
-  attempts++; // Increment attempts
-  if (attempts === 6) {
-    alert("Oops! Maximum attempts reached.");
-    setTimeout(() => {
-      location.reload(); // Reload the page after 3 seconds
-    }, 3000);
-  }
+
   const boxes = document.querySelectorAll(`#${rowId} .box`);
   let word = "";
   for (let box of boxes) {
@@ -100,9 +93,11 @@ async function checkWord(rowId) {
   if (!response.ok) {
     alert("Not a valid word");
     clearRow(rowId);
-
     return; // Stop further execution if word is not valid
   }
+
+  // Increment attempts only if the word is valid
+  attempts++;
 
   // Compare the guessed word with the generated word
   let delay = 500; // milliseconds
@@ -121,13 +116,13 @@ async function checkWord(rowId) {
       }
       // Check if all letters are correct after color changes
       if (greenCnt === 5) {
-        alert("Congratulations! You Won!!!");
-        alert("New Game will start. Best Luck");
-        // Reset the game after alert
-        resetGame();
         setTimeout(() => {
+          alert("Congratulations! You Won!!!");
+          alert("New Game will start. Best of Luck");
+          // Reset the game after alert
+          resetGame();
           location.reload();
-        }, 2000);
+        }, delay * (word.length + 1));
       }
     }, delay * (i + 1));
   }
@@ -139,12 +134,26 @@ async function checkWord(rowId) {
       btn.style.backgroundColor = "#007bff";
     }
   }
+
+  if (attempts === 6) {
+    setTimeout(() => {
+      alert("Oops! Maximum attempts reached.");
+      location.reload(); // Reload the page after 3 seconds
+    }, delay * (word.length + 1));
+  }
+
+  // Change the color of the used alphabet buttons
+  const usedLetters = new Set(word.split(""));
+  usedLetters.forEach((letter) => {
+    const alphabetBtn = document.getElementById(letter);
+    if (alphabetBtn) {
+      alphabetBtn.style.backgroundColor = "red";
+    }
+  });
 }
 
 function clearRow(rowId) {
-  // console.log("The row will be clear with id: ", rowId);
   const boxes = document.querySelectorAll(`#${rowId} .box`);
-  // console.log(boxes);
   for (let box of boxes) {
     box.textContent = "";
   }
